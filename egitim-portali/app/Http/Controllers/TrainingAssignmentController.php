@@ -19,14 +19,21 @@ class TrainingAssignmentController extends Controller
 {
     public function index(Request $request): View
     {
-        $status = $request->query('status');
+        $filters = $request->validate([
+            'status' => ['nullable', 'string', 'max:20'],
+            'training' => ['nullable', 'integer'],
+            'department' => ['nullable', 'string', 'max:100'],
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $status = $filters['status'] ?? null;
 
         $assignments = TrainingAssignment::with('training')
             ->when($status === 'overdue', fn ($query) => $query->overdue())
             ->when(AssignmentStatus::tryFrom((string) $status), fn ($query, $status) => $query->where('status', $status))
-            ->when($request->query('training'), fn ($query, $id) => $query->where('training_id', $id))
-            ->when($request->query('department'), fn ($query, $department) => $query->where('employee_department', $department))
-            ->search($request->query('search'))
+            ->when($filters['training'] ?? null, fn ($query, $id) => $query->where('training_id', $id))
+            ->when($filters['department'] ?? null, fn ($query, $department) => $query->where('employee_department', $department))
+            ->search($filters['search'] ?? null)
             ->latest()
             ->paginate(15)
             ->withQueryString();

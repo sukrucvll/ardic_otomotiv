@@ -12,9 +12,14 @@ class EmployeeController extends Controller
 {
     public function index(Request $request): View
     {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'department' => ['nullable', 'string', 'max:100'],
+        ]);
+
         $employees = Employee::query()
-            ->search($request->query('search'))
-            ->inDepartment($request->query('department'))
+            ->search($filters['search'] ?? null)
+            ->inDepartment($filters['department'] ?? null)
             ->orderByName()
             ->paginate(12)
             ->withQueryString();

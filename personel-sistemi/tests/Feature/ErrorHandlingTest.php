@@ -28,6 +28,14 @@ class ErrorHandlingTest extends TestCase
             ->assertSee('Ana sayfaya dön');
     }
 
+    public function test_malformed_filters_do_not_cause_server_error(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $this->get('/employees?search[]=x')->assertRedirect();
+        $this->get('/employees?department[]=x')->assertRedirect();
+    }
+
     public function test_api_errors_stay_json(): void
     {
         $this->getJson('/api/v1/employees/999')->assertUnauthorized()->assertJson(['message' => 'Unauthenticated.']);

@@ -15,9 +15,14 @@ class TrainingController extends Controller
 {
     public function index(Request $request): View
     {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'category' => ['nullable', 'string', 'max:100'],
+        ]);
+
         $trainings = Training::withProgress()
-            ->when($request->query('search'), fn ($query, $search) => $query->whereRaw('tr_lower(title) like ?', ['%'.TurkishText::lower(trim($search)).'%']))
-            ->when($request->query('category'), fn ($query, $category) => $query->where('category', $category))
+            ->when($filters['search'] ?? null, fn ($query, $search) => $query->whereRaw('tr_lower(title) like ?', ['%'.TurkishText::lower(trim($search)).'%']))
+            ->when($filters['category'] ?? null, fn ($query, $category) => $query->where('category', $category))
             ->latest()
             ->paginate(9)
             ->withQueryString();

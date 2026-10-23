@@ -25,7 +25,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('assignments/{assignment}', [TrainingAssignmentController::class, 'update'])->name('assignments.update');
     Route::delete('assignments/{assignment}', [TrainingAssignmentController::class, 'destroy'])->name('assignments.destroy');
 
+    // {employee} Personel Sistemi'ndeki ID'dir; PHP tam sayı sınırını aşan değerler 404 olur
     Route::get('employees', [EmployeeController::class, 'index'])->name('employees.index');
-    Route::get('employees/{employee}', [EmployeeController::class, 'show'])->whereNumber('employee')->name('employees.show');
-    Route::post('employees/{employee}/assignments', [TrainingAssignmentController::class, 'storeForEmployee'])->whereNumber('employee')->name('employees.assignments.store');
+    Route::get('employees/{employee}', [EmployeeController::class, 'show'])->where('employee', '[0-9]{1,18}')->name('employees.show');
+    Route::post('employees/{employee}/assignments', [TrainingAssignmentController::class, 'storeForEmployee'])->where('employee', '[0-9]{1,18}')->name('employees.assignments.store');
 });

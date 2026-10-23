@@ -23,6 +23,11 @@ class EmployeeController extends Controller
 {
     public function index(Request $request, PersonnelApiClient $personnel): View
     {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'department' => ['nullable', 'string', 'max:100'],
+        ]);
+
         $employees = collect();
         $departments = collect();
         $personnelUnavailable = false;
@@ -34,8 +39,8 @@ class EmployeeController extends Controller
             $personnelUnavailable = true;
         }
 
-        $search = TurkishText::lower(trim((string) $request->query('search')));
-        $department = $request->query('department');
+        $search = TurkishText::lower(trim((string) ($filters['search'] ?? '')));
+        $department = $filters['department'] ?? null;
 
         $filtered = $employees
             ->when($search !== '', fn ($items) => $items->filter(

@@ -29,6 +29,27 @@ class ErrorHandlingTest extends TestCase
             ->assertSee('Ana sayfaya dön');
     }
 
+    public function test_malformed_filters_do_not_cause_server_error(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        foreach ([
+            '/employees?search[]=x', '/employees?department[]=x',
+            '/trainings?search[]=x', '/trainings?category[]=x',
+            '/assignments?status[]=x', '/assignments?training[]=1', '/assignments?department[]=x', '/assignments?search[]=x',
+        ] as $url) {
+            $this->get($url)->assertRedirect();
+        }
+    }
+
+    public function test_out_of_range_employee_id_is_not_found(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $this->get('/employees/99999999999999999999')->assertNotFound();
+        $this->post('/employees/99999999999999999999/assignments', ['training_ids' => [1]])->assertNotFound();
+    }
+
     public function test_expired_page_redirects_guest_to_login(): void
     {
         $this->post('/_test/expired')
