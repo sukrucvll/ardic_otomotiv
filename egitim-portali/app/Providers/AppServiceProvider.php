@@ -32,10 +32,20 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrapFive();
 
-        // Türkçe arama/sıralama için SQLite'a tr_lower() ve "turkish" collation ekle
+        // Türkçe arama/sıralama için SQLite'a tr_lower() ve "turkish" collation ekle.
+        // PDO ilk sorguda açılır; fonksiyonlar da o anda eklenir (erken bağlantı açılmaz).
         Event::listen(function (ConnectionEstablished $event) {
-            if ($event->connection instanceof SQLiteConnection) {
-                TurkishText::registerSqliteFunctions($event->connection->getPdo());
+            $connection = $event->connection;
+
+            if ($connection instanceof SQLiteConnection) {
+                $pdo = $connection->getRawPdo();
+
+                $connection->setPdo(function () use ($pdo) {
+                    $pdo = value($pdo);
+                    TurkishText::registerSqliteFunctions($pdo);
+
+                    return $pdo;
+                });
             }
         });
     }
