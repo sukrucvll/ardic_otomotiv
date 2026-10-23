@@ -25,7 +25,7 @@ Token yalnızca sunucu tarafında, Personel Sistemi'nde terminal komutuyla üret
     php artisan personnel:issue-token --days=90    # 90 gün geçerli token
     php artisan personnel:issue-token --revoke     # tüm token'ları iptal eder
 
-    (Canlı sunucuda Docker ile: docker compose exec personel php artisan personnel:issue-token)
+    (Canlı sunucuda Docker ile: docker compose exec -u www-data personel php artisan personnel:issue-token)
 
 Token özellikleri:
   - Veritabanında yalnızca SHA-256 hash'i saklanır; düz hali sadece üretildiği anda gösterilir.

@@ -46,12 +46,12 @@ chmod 600 deploy/env/*.env
 # 3) Personel Sistemi
 cd deploy
 docker compose up -d --build personel
-docker compose exec personel php artisan db:seed --force              # yönetici + örnek personel
-docker compose exec personel php artisan personnel:issue-token        # token'ı kopyalayın
+docker compose exec -u www-data personel php artisan db:seed --force              # yönetici + örnek personel
+docker compose exec -u www-data personel php artisan personnel:issue-token        # token'ı kopyalayın
 
 # 4) Eğitim Portalı: token'ı env/egitim.env içindeki PERSONNEL_API_TOKEN'a yazın
 docker compose up -d --build egitim
-docker compose exec egitim php artisan db:seed --force                # yönetici + eğitimler + demo atamalar
+docker compose exec -u www-data egitim php artisan db:seed --force                # yönetici + eğitimler + demo atamalar
 
 # 5) nginx + HTTPS
 cp nginx/personel.turkuazcode.com.conf /etc/nginx/sites-available/personel.turkuazcode.com
@@ -68,13 +68,13 @@ certbot --nginx -d egitim.turkuazcode.com --redirect
 ```bash
 docker compose ps                                    # durum
 docker compose logs -f egitim                        # Apache/PHP çıktısı
-docker compose exec egitim tail -f storage/logs/laravel-$(date +%F).log
+docker compose exec -u www-data egitim tail -f storage/logs/laravel-$(date +%F).log
 
 # .env değiştikten sonra (önbellek yeniden oluşur)
 docker compose restart egitim
 
 # Token yenileme
-docker compose exec personel php artisan personnel:issue-token
+docker compose exec -u www-data personel php artisan personnel:issue-token
 #   → env/egitim.env içine yazın, ardından: docker compose restart egitim
 
 # Yeni kod
