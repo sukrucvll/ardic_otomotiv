@@ -79,9 +79,12 @@ docker compose exec -u www-data personel php artisan personnel:issue-token
 
 # Yeni kod
 cd /opt/ardic-otomotiv && git pull && cd deploy && docker compose up -d --build
+
+# Yeniden derlemeden kalan eski imajları sil (yalnızca bu projenin etiketli imajları)
+docker image prune -f --filter label=com.docker.compose.project=ardic-otomotiv
 ```
 
-> Sunucuda başka projeler de çalışıyor: bu projede yalnızca `docker compose` komutlarını **`deploy` klasörü içinde** çalıştırın (proje adı `ardic-otomotiv`). `docker system prune` kullanmayın.
+> Sunucuda başka projeler de çalışıyor: bu projede yalnızca `docker compose` komutlarını **`deploy` klasörü içinde** çalıştırın (proje adı `ardic-otomotiv`). `docker system prune` veya filtresiz `docker image prune` kullanmayın.
 
 ## Kontrol
 

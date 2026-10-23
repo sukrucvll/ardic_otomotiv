@@ -3,6 +3,13 @@
 # dosyalarındadır ve git'e girmez.
 name: ardic-otomotiv
 
+# Apache erişim log'ları konteyner çıktısına yazılır; disk dolmasın diye sınırlanır
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   personel:
     build:
@@ -12,6 +19,7 @@ services:
         APP: personel-sistemi
     image: ardic-otomotiv/personel-sistemi
     restart: unless-stopped
+    logging: *logging
     environment:
       DB_DATABASE: /var/www/data/database.sqlite
     volumes:
@@ -29,6 +37,7 @@ services:
         APP: egitim-portali
     image: ardic-otomotiv/egitim-portali
     restart: unless-stopped
+    logging: *logging
     environment:
       DB_DATABASE: /var/www/data/database.sqlite
     volumes:

@@ -25,6 +25,11 @@ class EmployeeManagementTest extends TestCase
         $this->get('/employees')->assertOk()->assertSee($employee->full_name);
     }
 
+    public function test_employee_list_renders_when_empty(): void
+    {
+        $this->get('/employees')->assertOk()->assertSee('Kriterlere uygun personel bulunamadı.');
+    }
+
     public function test_employee_can_be_created(): void
     {
         $this->post('/employees', [

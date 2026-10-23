@@ -106,8 +106,8 @@ Bu bilgiler portalın `.env` dosyasındaki `ADMIN_NAME`, `ADMIN_EMAIL` ve `ADMIN
 ### Testler
 
 ```bash
-cd personel-sistemi && php artisan test   # 39 test: giriş/oturum, API güvenliği, Türkçe arama/sıralama, CRUD, token komutu, hata sayfaları
-cd ../egitim-portali && php artisan test  # 36 test: giriş/oturum, API istemcisi, atama akışı, Türkçe arama/sıralama, API kapalıyken davranış, hata sayfaları
+cd personel-sistemi && php artisan test   # 40 test: giriş/oturum, API güvenliği, Türkçe arama/sıralama, CRUD, token komutu, hata sayfaları
+cd ../egitim-portali && php artisan test  # 37 test: giriş/oturum, API istemcisi, atama akışı, Türkçe arama/sıralama, API kapalıyken davranış, hata sayfaları
 ```
 
 Portal testleri Personel API'sini `Http::fake()` ile taklit eder, çalışan bir Personel Sistemi gerektirmez.

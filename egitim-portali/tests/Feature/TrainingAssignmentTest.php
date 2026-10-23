@@ -175,6 +175,20 @@ class TrainingAssignmentTest extends TestCase
         $this->get('/employees/1')->assertOk()->assertSee('Ahmet Yılmaz');
     }
 
+    public function test_all_pages_render_with_empty_database(): void
+    {
+        Http::fake(['personel.test/*' => Http::response(['data' => [], 'meta' => ['last_page' => 1]])]);
+
+        $this->get('/')->assertOk()->assertSee('Henüz atama yapılmadı.');
+        $this->get('/trainings')->assertOk();
+        $this->get('/trainings/create')->assertOk();
+        $this->get('/assignments')->assertOk()->assertSee('Kriterlere uygun atama bulunamadı.');
+        $this->get('/employees')->assertOk()->assertSee('Kriterlere uygun personel bulunamadı.');
+
+        $training = Training::factory()->create();
+        $this->get("/trainings/{$training->id}")->assertOk()->assertSee('kayıtlı personel yok.');
+    }
+
     public function test_interface_does_not_expose_api_details(): void
     {
         $this->fakePersonnelApi();
