@@ -57,7 +57,7 @@ php artisan serve --port=8001
 
 | E-posta | Parola |
 |---|---|
-| `ik@sirket.test` | `Ik.2026!` |
+| `ik@admin.com` | `153624##AA` |
 
 Bu bilgiler `.env` dosyasındaki `ADMIN_NAME`, `ADMIN_EMAIL` ve `ADMIN_PASSWORD` ile değiştirilebilir (`php artisan db:seed --class=AdminUserSeeder`).
 
@@ -94,7 +94,7 @@ php artisan serve --port=8002
 
 | E-posta | Parola |
 |---|---|
-| `egitim@sirket.test` | `Egitim.2026!` |
+| `egitim@admin.com` | `153624##AA` |
 
 Bu bilgiler portalın `.env` dosyasındaki `ADMIN_NAME`, `ADMIN_EMAIL` ve `ADMIN_PASSWORD` ile değiştirilebilir.
 

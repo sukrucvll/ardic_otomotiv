@@ -37,8 +37,8 @@ return [
 
     'admin' => [
         'name' => env('ADMIN_NAME', 'İK Yöneticisi'),
-        'email' => env('ADMIN_EMAIL', 'ik@sirket.test'),
-        'password' => env('ADMIN_PASSWORD', 'Ik.2026!'),
+        'email' => env('ADMIN_EMAIL', 'ik@admin.com'),
+        'password' => env('ADMIN_PASSWORD', '153624##AA'),
     ],
 
     /*

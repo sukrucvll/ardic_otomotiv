@@ -32,8 +32,8 @@ return [
 
     'admin' => [
         'name' => env('ADMIN_NAME', 'Eğitim Sorumlusu'),
-        'email' => env('ADMIN_EMAIL', 'egitim@sirket.test'),
-        'password' => env('ADMIN_PASSWORD', 'Egitim.2026!'),
+        'email' => env('ADMIN_EMAIL', 'egitim@admin.com'),
+        'password' => env('ADMIN_PASSWORD', '153624##AA'),
     ],
 
 ];
