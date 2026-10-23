@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Personeller · Eğitim Portalı</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="http://127.0.0.1:8012/css/app.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar d-none d-lg-flex">
+        <a href="http://127.0.0.1:8012" class="brand">
+    <span class="brand-logo"><i class="bi bi-mortarboard-fill"></i></span>
+    <span>
+        <span class="brand-title d-block">Eğitim Portalı</span>
+        <span class="brand-sub">Eğitim Takip Sistemi</span>
+    </span>
+</a>
+
+<div class="nav-section">Genel</div>
+<nav class="nav flex-column side-nav gap-1">
+    <a class="nav-link " href="http://127.0.0.1:8012">
+        <i class="bi bi-grid-1x2"></i> Panel
+    </a>
+    <a class="nav-link " href="http://127.0.0.1:8012/trainings">
+        <i class="bi bi-journal-bookmark"></i> Eğitimler
+    </a>
+    <a class="nav-link " href="http://127.0.0.1:8012/assignments">
+        <i class="bi bi-list-check"></i> Atamalar
+    </a>
+    <a class="nav-link active" href="http://127.0.0.1:8012/employees">
+        <i class="bi bi-people"></i> Personeller
+    </a>
+</nav>
+
+<div class="sidebar-user">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="avatar">E</span>
+            <div class="min-w-0">
+                <div class="sidebar-user-name text-truncate">Eğitim Sorumlusu</div>
+                <div class="sidebar-user-email text-truncate">egitim@admin.com</div>
+            </div>
+        </div>
+        <form method="POST" action="http://127.0.0.1:8012/logout">
+            <input type="hidden" name="_token" value="vcCkEu86dRZoR1NfzHMx3D3UspykBCgKQIUKMDRB" autocomplete="off">            <button class="btn btn-sm btn-logout w-100"><i class="bi bi-box-arrow-right me-1"></i> Çıkış yap</button>
+        </form>
+    </div>
+    </aside>
+
+    <div class="offcanvas offcanvas-start sidebar-mobile" tabindex="-1" id="mobileNav">
+        <div class="offcanvas-body d-flex flex-column">
+            <a href="http://127.0.0.1:8012" class="brand">
+    <span class="brand-logo"><i class="bi bi-mortarboard-fill"></i></span>
+    <span>
+        <span class="brand-title d-block">Eğitim Portalı</span>
+        <span class="brand-sub">Eğitim Takip Sistemi</span>
+    </span>
+</a>
+
+<div class="nav-section">Genel</div>
+<nav class="nav flex-column side-nav gap-1">
+    <a class="nav-link " href="http://127.0.0.1:8012">
+        <i class="bi bi-grid-1x2"></i> Panel
+    </a>
+    <a class="nav-link " href="http://127.0.0.1:8012/trainings">
+        <i class="bi bi-journal-bookmark"></i> Eğitimler
+    </a>
+    <a class="nav-link " href="http://127.0.0.1:8012/assignments">
+        <i class="bi bi-list-check"></i> Atamalar
+    </a>
+    <a class="nav-link active" href="http://127.0.0.1:8012/employees">
+        <i class="bi bi-people"></i> Personeller
+    </a>
+</nav>
+
+<div class="sidebar-user">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="avatar">E</span>
+            <div class="min-w-0">
+                <div class="sidebar-user-name text-truncate">Eğitim Sorumlusu</div>
+                <div class="sidebar-user-email text-truncate">egitim@admin.com</div>
+            </div>
+        </div>
+        <form method="POST" action="http://127.0.0.1:8012/logout">
+            <input type="hidden" name="_token" value="vcCkEu86dRZoR1NfzHMx3D3UspykBCgKQIUKMDRB" autocomplete="off">            <button class="btn btn-sm btn-logout w-100"><i class="bi bi-box-arrow-right me-1"></i> Çıkış yap</button>
+        </form>
+    </div>
+        </div>
+    </div>
+
+    <div class="app-main">
+        <header class="topbar d-flex align-items-center gap-3">
+            <button class="btn btn-light btn-icon d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#mobileNav" aria-label="Menü">
+                <i class="bi bi-list fs-5"></i>
+            </button>
+            <nav aria-label="breadcrumb" class="small">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item text-muted">Eğitim Portalı</li>
+                    <li class="breadcrumb-item active fw-medium text-dark">Personeller</li>
+                </ol>
+            </nav>
+            <div class="ms-auto d-flex align-items-center gap-3 small text-muted">
+                <span class="d-none d-md-inline"><i class="bi bi-calendar3 me-1"></i>24 Ekim 2026, Cumartesi</span>
+                <div class="dropdown">
+                    <button class="user-chip btn btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="avatar bg-primary-subtle text-primary-emphasis">E</span>
+                        <span class="d-none d-sm-inline fw-medium">Eğitim Sorumlusu</span>
+                        <i class="bi bi-chevron-down small"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li class="px-3 py-2">
+                            <div class="fw-semibold text-dark">Eğitim Sorumlusu</div>
+                            <div class="small text-muted">egitim@admin.com</div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="POST" action="http://127.0.0.1:8012/logout">
+                                <input type="hidden" name="_token" value="vcCkEu86dRZoR1NfzHMx3D3UspykBCgKQIUKMDRB" autocomplete="off">                                <button class="dropdown-item text-danger"><i class="bi bi-box-arrow-right"></i> Çıkış yap</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="page-header d-flex flex-wrap align-items-end justify-content-between gap-3">
+                <div>
+                    <h1 class="page-title">Personeller</h1>
+                                            <p class="page-subtitle">Çalışanlar ve eğitim ilerlemeleri.</p>
+                                    </div>
+                <div class="d-flex gap-2">
+                                    </div>
+            </div>
+
+                        <div class="alert alert-warning d-flex gap-3 align-items-start border-0 shadow-sm mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle fs-4"></i>
+    <div>
+        <div class="fw-semibold">Personel bilgileri şu anda alınamıyor</div>
+        <div class="small">Mevcut atamalar görüntülenmeye devam ediyor. Yeni atama yapmak için biraz sonra tekrar deneyin.</div>
+    </div>
+</div>
+    
+    <div class="card">
+        <div class="card-header">
+            <form method="GET" class="row g-2 align-items-center">
+                <div class="col-12 col-md">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="search" name="search" value="" class="form-control" placeholder="Ad, soyad veya e-posta ile ara...">
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 col-lg-3">
+                    <select name="department" class="form-select" onchange="this.form.submit()">
+                        <option value="">Tüm departmanlar</option>
+                                            </select>
+                </div>
+                <div class="col-auto"><button class="btn btn-outline-primary"><i class="bi bi-funnel me-1"></i> Filtrele</button></div>
+                            </form>
+        </div>
+
+                    <div class="empty-state">
+                <i class="bi bi-people"></i>
+                Personel listesi alınamadı.
+            </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+                            </div>
+
+
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-body p-4 text-center">
+                <div class="stat-icon bg-danger-subtle text-danger mx-auto mb-3"><i class="bi bi-exclamation-triangle"></i></div>
+                <h5 class="fw-semibold mb-2" data-confirm-title>Emin misiniz?</h5>
+                <p class="text-muted mb-4" data-confirm-message></p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Vazgeç</button>
+                    <button type="button" class="btn btn-danger px-4" data-confirm-ok>Onayla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="http://127.0.0.1:8012/js/app.js"></script>
+</body>
+</html>
