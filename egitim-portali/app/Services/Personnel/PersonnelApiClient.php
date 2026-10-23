@@ -2,6 +2,7 @@
 
 namespace App\Services\Personnel;
 
+use App\Events\PersonnelListFetched;
 use App\Support\TurkishText;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
@@ -44,17 +45,25 @@ class PersonnelApiClient
      */
     public function employees(bool $fresh = false): Collection
     {
-        // Atama gibi veri yazan işlemler önbelleği atlayıp güncel listeyi ister
-        if ($fresh) {
-            Cache::forget(self::EMPLOYEES_CACHE_KEY);
+        // Önbellekte nesne değil düz dizi tutulur (Laravel önbellekten sınıf açmaz).
+        // Atama gibi veri yazan işlemler önbelleği atlayıp güncel listeyi ister.
+        $rows = $fresh ? null : Cache::get(self::EMPLOYEES_CACHE_KEY);
+        $fetched = $rows === null;
+
+        if ($fetched) {
+            $rows = $this->fetchAllEmployees();
+            Cache::put(self::EMPLOYEES_CACHE_KEY, $rows, $this->cacheTtl);
         }
 
-        // Önbellekte nesne değil düz dizi tutulur (Laravel önbellekten sınıf açmaz)
-        $rows = Cache::remember(self::EMPLOYEES_CACHE_KEY, $this->cacheTtl, fn () => $this->fetchAllEmployees());
-
-        return collect($rows)
+        $employees = collect($rows)
             ->map(fn (array $row) => EmployeeData::fromArray($row))
             ->keyBy('id');
+
+        if ($fetched) {
+            PersonnelListFetched::dispatch($employees);
+        }
+
+        return $employees;
     }
 
     /**

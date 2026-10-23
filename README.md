@@ -107,7 +107,7 @@ Bu bilgiler portalın `.env` dosyasındaki `ADMIN_NAME`, `ADMIN_EMAIL` ve `ADMIN
 
 ```bash
 cd personel-sistemi && php artisan test   # 44 test: giriş/oturum, API güvenliği, Türkçe arama/sıralama, CRUD, token komutu, hata sayfaları
-cd ../egitim-portali && php artisan test  # 42 test: giriş/oturum, API istemcisi, atama akışı, Türkçe arama/sıralama, API kapalıyken davranış, hata sayfaları
+cd ../egitim-portali && php artisan test  # 47 test: giriş/oturum, API istemcisi, atama akışı, Türkçe arama/sıralama, API kapalıyken davranış, hata sayfaları
 ```
 
 Portal testleri Personel API'sini `Http::fake()` ile taklit eder, çalışan bir Personel Sistemi gerektirmez.
@@ -148,12 +148,12 @@ Her iki uygulamanın ekranları da yalnızca oturum açmış kullanıcılara aç
 - **Atamalarda dış referans + snapshot.** `training_assignments.employee_id` Personel Sistemi'ndeki ID'dir. Farklı veritabanı olduğu için foreign key yoktur. Atama anında ad, e-posta ve departman da kaydedilir. Böylece:
   - Personel API'si çökse bile atamalar ve geçmiş görüntülenebilir. Kullanıcıya sade bir uyarı gösterilir ("Personel bilgileri şu anda alınamıyor"); teknik ayrıntı (HTTP kodu, token hatası) yalnızca `storage/logs/laravel.log` dosyasına yazılır,
   - Personel silinse bile "bu eğitimi kim almıştı" bilgisi kaybolmaz ("Sistemde yok" etiketiyle gösterilir).
-  - Snapshot'lar, personel sayfası açıldığında güncel bilgiyle eşitlenir.
+  - Personel listesi API'den her yenilendiğinde (en fazla dakikada bir) atamalardaki ad, e-posta ve departman güncel bilgiyle eşitlenir; panel ve filtreler eski departmanla hesaplanmaz.
 - **Formdan gelen ID'lere güvenilmez.** Atama yapılırken seçilen personel ID'leri sunucu tarafında API'den doğrulanır. Personel Sistemi'nde olmayan bir ID ile atama yapılamaz.
 - **Dayanıklı HTTP istemcisi.** 5 saniye timeout, bağlantı hatası ve 5xx yanıtlarında 2 yeniden deneme, 401/403/429 gibi durumlar için anlaşılır Türkçe hata mesajları.
 - **Silinen personel geri eklenebilir.** Personel kalıcı silinmez (soft delete). Silinmiş bir kişi aynı e-postayla tekrar eklenirse eski kaydı aynı ID ile geri yüklenir, böylece portaldaki atama geçmişi kendiliğinden geri bağlanır.
 - **Türkçe arama ve sıralama.** SQLite'ın `LIKE` işlemi yalnızca ASCII harflerde büyük/küçük harf duyarsızdır ("çelik" ile "Çelik" eşleşmez). Bu yüzden SQLite bağlantısına Türkçe kurallarına uygun `tr_lower()` fonksiyonu ve `turkish` sıralama kuralı (collation) eklenir; aramalar büyük/küçük harf duyarsız çalışır, isimler Türkçe alfabe sırasıyla listelenir.
-- **Durum modeli:** `Atandı → Devam Ediyor → Tamamlandı` (PHP enum). Tamamlandığında `completed_at` kaydedilir. Son tarihi geçen ve tamamlanmamış atamalar **Gecikmiş** olarak işaretlenir.
+- **Durum modeli:** `Atandı → Devam Ediyor → Tamamlandı` (PHP enum). Tamamlandığında `completed_at` kaydedilir. Son tarihi geçen ve tamamlanmamış atamalar **Gecikmiş** olarak işaretlenir. Son tarih ve (eğitim önceden yapılıp sonradan işaretlendiyse) tamamlanma tarihi, atama satırındaki **Tarihleri düzenle** penceresinden düzeltilebilir.
 - **Frontend:** Blade + Bootstrap 5 (CDN). Build adımı gerektirmez. İki uygulama aynı tasarım dilini kullanır ama vurgu renkleri farklıdır (Personel: indigo, Portal: teal), böylece hangi sistemde olduğunuz bir bakışta anlaşılır.
 
 ## API Uçları (Personel Sistemi)

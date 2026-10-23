@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 #[Fillable([
     'training_id', 'employee_id', 'employee_name', 'employee_email', 'employee_department',
@@ -56,6 +57,21 @@ class TrainingAssignment extends Model
         $this->completed_at = $status === AssignmentStatus::Completed
             ? ($this->completed_at ?? now())
             : null;
+        $this->save();
+    }
+
+    /**
+     * Son tarihi ve tamamlanmış atamada tamamlanma gününü düzeltir (ör. eğitim
+     * geçen hafta yapıldı ama bugün işaretlendi). Tamamlanma saati korunur.
+     */
+    public function changeDates(?string $dueDate, ?string $completedOn = null): void
+    {
+        $this->due_date = $dueDate;
+
+        if ($this->status === AssignmentStatus::Completed && $completedOn !== null) {
+            $this->completed_at = ($this->completed_at ?? now())->copy()->setDateFrom(Carbon::parse($completedOn));
+        }
+
         $this->save();
     }
 

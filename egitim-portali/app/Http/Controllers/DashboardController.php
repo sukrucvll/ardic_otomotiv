@@ -5,12 +5,22 @@ namespace App\Http\Controllers;
 use App\Enums\AssignmentStatus;
 use App\Models\Training;
 use App\Models\TrainingAssignment;
+use App\Services\Personnel\PersonnelApiClient;
+use App\Services\Personnel\PersonnelApiException;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(): View
+    public function __invoke(PersonnelApiClient $personnel): View
     {
+        // Önbellek süresi dolduysa personel listesi yenilenir ve atamalardaki departman
+        // bilgisi güncellenir (SyncSnapshotsFromPersonnelList). API kapalıysa panel son
+        // bilinen bilgilerle açılır.
+        try {
+            $personnel->employees();
+        } catch (PersonnelApiException) {
+        }
+
         $statusCounts = TrainingAssignment::toBase()
             ->selectRaw('status, count(*) as total')
             ->groupBy('status')
@@ -27,7 +37,7 @@ class DashboardController extends Controller
             'overdue' => TrainingAssignment::overdue()->count(),
         ];
 
-        // Departman bilgisi atamadaki personel snapshot'ından gelir; API çağrısı gerekmez
+        // Departman bilgisi atamadaki personel snapshot'ından gelir
         $departments = TrainingAssignment::toBase()
             ->selectRaw('employee_department as name, count(*) as total, sum(case when status = ? then 1 else 0 end) as completed', [AssignmentStatus::Completed->value])
             ->groupBy('employee_department')

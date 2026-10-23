@@ -112,6 +112,32 @@
     </div>
 </div>
 
+{{-- Atama tarihlerini düzenleme penceresi (button[data-edit-assignment] ile açılır) --}}
+<div class="modal fade" id="assignmentDatesModal" tabindex="-1" aria-labelledby="assignmentDatesTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" class="modal-content border-0 shadow-lg">
+            @csrf
+            @method('PATCH')
+            <div class="modal-body p-4">
+                <h5 class="fw-semibold mb-1" id="assignmentDatesTitle">Tarihleri düzenle</h5>
+                <p class="text-muted small mb-4" data-assignment-title></p>
+                <div class="mb-3">
+                    <label for="edit_due_date" class="form-label">Son tamamlama tarihi <span class="text-muted fw-normal">(opsiyonel)</span></label>
+                    <input type="date" id="edit_due_date" name="due_date" class="form-control">
+                </div>
+                <div class="mb-3" data-completed-field>
+                    <label for="edit_completed_on" class="form-label">Tamamlanma tarihi</label>
+                    <input type="date" id="edit_completed_on" name="completed_on" class="form-control" max="{{ today()->toDateString() }}">
+                </div>
+                <div class="d-flex gap-2 justify-content-end">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Vazgeç</button>
+                    <button class="btn btn-primary px-4"><i class="bi bi-check2 me-1"></i> Kaydet</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('js/app.js') }}"></script>
 @stack('scripts')

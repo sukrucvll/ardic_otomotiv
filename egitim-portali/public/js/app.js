@@ -34,6 +34,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Atama tarihlerini düzenleme penceresi: tıklanan satırın bilgileriyle doldurulur
+    const datesModalEl = document.getElementById('assignmentDatesModal');
+
+    if (datesModalEl) {
+        const datesModal = new bootstrap.Modal(datesModalEl);
+        const datesForm = datesModalEl.querySelector('form');
+        const dueInput = datesForm.querySelector('[name="due_date"]');
+        const completedInput = datesForm.querySelector('[name="completed_on"]');
+        const completedField = datesForm.querySelector('[data-completed-field]');
+
+        document.querySelectorAll('[data-edit-assignment]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const { action, title, dueDate, completedOn } = button.dataset;
+
+                datesForm.action = action;
+                datesModalEl.querySelector('[data-assignment-title]').textContent = title;
+                dueInput.value = dueDate || '';
+                completedInput.value = completedOn || '';
+
+                // Tamamlanma tarihi yalnızca tamamlanmış atamada düzenlenir
+                completedInput.disabled = !completedOn;
+                completedField.classList.toggle('d-none', !completedOn);
+
+                datesModal.show();
+            });
+        });
+    }
+
     // Panoya kopyalama
     document.querySelectorAll('[data-copy-target]').forEach((button) => {
         button.addEventListener('click', async () => {

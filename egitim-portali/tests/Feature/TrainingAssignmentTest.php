@@ -277,6 +277,76 @@ class TrainingAssignmentTest extends TestCase
         $this->assertGreaterThan(1, TrainingAssignment::count());
     }
 
+    public function test_snapshots_are_synced_when_personnel_list_is_refreshed(): void
+    {
+        $this->fakePersonnelApi();
+        $assignment = $this->makeAssignment(['employee_id' => 2, 'employee_name' => 'Eski İsim', 'employee_department' => 'Üretim']);
+
+        // Personel sayfası açılmadan, sadece panel açılınca bile güncellenir
+        $this->get('/')->assertOk();
+
+        $this->assertSame('Ayşe Kaya', $assignment->fresh()->employee_name);
+        $this->assertSame('Kalite', $assignment->fresh()->employee_department);
+        $this->get('/assignments?department=Kalite')->assertOk()->assertSee('Ayşe Kaya');
+    }
+
+    public function test_due_date_and_completion_date_can_be_corrected(): void
+    {
+        $this->travelTo(now()->setTime(16, 0));
+        $assignment = $this->makeAssignment(['due_date' => today()->addDays(5)]);
+        $assignment->changeStatus(AssignmentStatus::Completed);
+        $completedAt = $assignment->fresh()->completed_at;
+
+        $this->patch("/assignments/{$assignment->id}/dates", [
+            'due_date' => today()->addDays(10)->toDateString(),
+            'completed_on' => today()->subDays(3)->toDateString(),
+        ])->assertSessionHas('success');
+
+        $assignment->refresh();
+        $this->assertTrue($assignment->due_date->isSameDay(today()->addDays(10)));
+        $this->assertTrue($assignment->completed_at->isSameDay(today()->subDays(3)));
+        $this->assertSame($completedAt->format('H:i:s'), $assignment->completed_at->format('H:i:s'));
+    }
+
+    public function test_due_date_can_be_changed_or_cleared_on_open_assignment(): void
+    {
+        $assignment = $this->makeAssignment(['due_date' => today()->addDays(5)]);
+
+        $this->patch("/assignments/{$assignment->id}/dates", ['due_date' => today()->subDay()->toDateString()])->assertSessionHas('success');
+        $this->assertTrue($assignment->fresh()->is_overdue);
+
+        $this->patch("/assignments/{$assignment->id}/dates", ['due_date' => ''])->assertSessionHas('success');
+        $this->assertNull($assignment->fresh()->due_date);
+    }
+
+    public function test_invalid_dates_are_rejected(): void
+    {
+        $open = $this->makeAssignment(['due_date' => today()->addDays(5)]);
+        $completed = $this->makeAssignment();
+        $completed->changeStatus(AssignmentStatus::Completed);
+
+        // Tamamlanmamış atamaya tamamlanma tarihi, tamamlanmışa gelecek tarih girilemez
+        $this->patch("/assignments/{$open->id}/dates", ['completed_on' => today()->toDateString()])->assertSessionHas('error');
+        $this->patch("/assignments/{$completed->id}/dates", ['completed_on' => today()->addDay()->toDateString()])->assertSessionHas('error');
+        $this->patch("/assignments/{$open->id}/dates", ['due_date' => 'yarın'])->assertSessionHas('error');
+        $this->patch("/assignments/{$open->id}/dates", ['due_date' => ['x']])->assertSessionHas('error');
+
+        $this->assertTrue($open->fresh()->due_date->isSameDay(today()->addDays(5)));
+        $this->assertTrue($completed->fresh()->completed_at->isToday());
+    }
+
+    public function test_dates_modal_is_available_on_assignment_rows(): void
+    {
+        $this->fakePersonnelApi();
+        $assignment = $this->makeAssignment(['employee_id' => 1]);
+
+        foreach (["/trainings/{$assignment->training_id}", '/employees/1', '/assignments'] as $url) {
+            $this->get($url)->assertOk()
+                ->assertSee('data-edit-assignment', false)
+                ->assertSee(route('assignments.dates', $assignment), false);
+        }
+    }
+
     public function test_employee_page_refreshes_snapshot(): void
     {
         $this->fakePersonnelApi();

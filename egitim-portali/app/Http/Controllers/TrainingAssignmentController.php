@@ -12,12 +12,13 @@ use App\Services\Personnel\PersonnelApiClient;
 use App\Services\Personnel\PersonnelApiException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class TrainingAssignmentController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, PersonnelApiClient $personnel): View
     {
         $filters = $request->validate([
             'status' => ['nullable', 'string', 'max:20'],
@@ -25,6 +26,13 @@ class TrainingAssignmentController extends Controller
             'department' => ['nullable', 'string', 'max:100'],
             'search' => ['nullable', 'string', 'max:100'],
         ]);
+
+        // Departman/isim filtreleri atamadaki bilgiye göre çalışır; önbellek süresi
+        // dolduysa liste yenilenip bu bilgiler güncellenir. API kapalıysa sayfa yine açılır.
+        try {
+            $personnel->employees();
+        } catch (PersonnelApiException) {
+        }
 
         $status = $filters['status'] ?? null;
 
@@ -105,6 +113,29 @@ class TrainingAssignmentController extends Controller
         $assignment->changeStatus(AssignmentStatus::from($data['status']));
 
         return back()->with('success', "{$assignment->employee_name}: \"{$assignment->training->title}\" durumu {$assignment->status->label()} olarak güncellendi.");
+    }
+
+    /**
+     * Son tarihi ve tamamlanma tarihini düzenleme (atama satırındaki pencereden).
+     */
+    public function updateDates(Request $request, TrainingAssignment $assignment): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'due_date' => ['nullable', 'date'],
+            'completed_on' => $assignment->status === AssignmentStatus::Completed
+                ? ['required', 'date', 'before_or_equal:today']
+                : ['prohibited'],
+        ]);
+
+        // Form bir pencerede olduğu için hata, sayfanın üstünde bildirim olarak gösterilir
+        if ($validator->fails()) {
+            return back()->with('error', $validator->errors()->first());
+        }
+
+        $data = $validator->validated();
+        $assignment->changeDates($data['due_date'] ?? null, $data['completed_on'] ?? null);
+
+        return back()->with('success', "{$assignment->employee_name}: \"{$assignment->training->title}\" ataması güncellendi.");
     }
 
     public function destroy(TrainingAssignment $assignment): RedirectResponse

@@ -4,6 +4,7 @@ return [
 
     'after_or_equal' => ':attribute :date veya sonrası bir tarih olmalıdır.',
     'array' => ':attribute alanı bir liste olmalıdır.',
+    'before_or_equal' => ':attribute :date veya öncesi bir tarih olmalıdır.',
     'boolean' => ':attribute alanı doğru veya yanlış olmalıdır.',
     'date' => ':attribute geçerli bir tarih olmalıdır.',
     'distinct' => ':attribute alanında tekrar eden değer var.',
@@ -22,6 +23,7 @@ return [
         'string' => ':attribute en az :min karakter olmalıdır.',
         'array' => ':attribute en az :min öğe içermelidir.',
     ],
+    'prohibited' => ':attribute yalnızca tamamlanmış atamalarda girilebilir.',
     'required' => ':attribute alanı zorunludur.',
     'string' => ':attribute metin olmalıdır.',
 
@@ -38,6 +40,7 @@ return [
         'training_ids' => 'Eğitim',
         'training_ids.*' => 'Eğitim',
         'due_date' => 'Son tamamlama tarihi',
+        'completed_on' => 'Tamamlanma tarihi',
         'status' => 'Durum',
         'today' => 'bugün',
     ],

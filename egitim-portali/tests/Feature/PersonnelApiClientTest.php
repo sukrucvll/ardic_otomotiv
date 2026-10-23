@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Services\Personnel\PersonnelApiClient;
 use App\Services\Personnel\PersonnelApiException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
@@ -13,6 +14,9 @@ use Tests\TestCase;
 
 class PersonnelApiClientTest extends TestCase
 {
+    // Yeni alınan liste atamalardaki personel bilgilerini günceller (veritabanı gerekir)
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();

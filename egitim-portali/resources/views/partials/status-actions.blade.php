@@ -28,6 +28,15 @@
             @endforeach
             <li><hr class="dropdown-divider"></li>
             <li>
+                <button type="button" class="dropdown-item" data-edit-assignment
+                        data-action="{{ route('assignments.dates', $assignment) }}"
+                        data-title="{{ $assignment->employee_name }} · {{ $assignment->training->title }}"
+                        data-due-date="{{ $assignment->due_date?->toDateString() }}"
+                        data-completed-on="{{ $assignment->status === \App\Enums\AssignmentStatus::Completed ? $assignment->completed_at?->toDateString() : '' }}">
+                    <i class="bi bi-calendar-event"></i> Tarihleri düzenle
+                </button>
+            </li>
+            <li>
                 <form method="POST" action="{{ route('assignments.destroy', $assignment) }}"
                       data-confirm="{{ $assignment->employee_name }} kişisinin &quot;{{ $assignment->training->title }}&quot; ataması kaldırılacak."
                       data-confirm-title="Atama kaldırılsın mı?" data-confirm-button="Kaldır">

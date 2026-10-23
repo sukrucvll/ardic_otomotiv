@@ -23,6 +23,7 @@ Route::middleware('auth')->group(function () {
     Route::get('assignments', [TrainingAssignmentController::class, 'index'])->name('assignments.index');
     Route::post('trainings/{training}/assignments', [TrainingAssignmentController::class, 'store'])->name('assignments.store');
     Route::patch('assignments/{assignment}', [TrainingAssignmentController::class, 'update'])->name('assignments.update');
+    Route::patch('assignments/{assignment}/dates', [TrainingAssignmentController::class, 'updateDates'])->name('assignments.dates');
     Route::delete('assignments/{assignment}', [TrainingAssignmentController::class, 'destroy'])->name('assignments.destroy');
 
     // {employee} Personel Sistemi'ndeki ID'dir; PHP tam sayı sınırını aşan değerler 404 olur
