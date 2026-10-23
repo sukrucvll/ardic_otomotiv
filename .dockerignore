@@ -1,0 +1,14 @@
+# Docker imajına girmemesi gerekenler (yerel kurulum, gizli ayarlar, veritabanları)
+**/vendor
+**/node_modules
+**/.env
+**/.env.backup
+**/.phpunit.result.cache
+**/database/*.sqlite*
+**/storage/logs/*.log
+**/storage/framework/cache/data
+**/storage/framework/sessions/*
+**/storage/framework/views/*.php
+**/bootstrap/cache/*.php
+deploy/env
+.git

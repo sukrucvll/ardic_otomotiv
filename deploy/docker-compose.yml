@@ -1,0 +1,47 @@
+# Canlı ortam: iki uygulama ayrı konteynerlerde, yalnızca 127.0.0.1'de dinler.
+# Dışarıya sunucudaki nginx açar (deploy/nginx). Gizli ayarlar deploy/env/*.env
+# dosyalarındadır ve git'e girmez.
+name: ardic-otomotiv
+
+services:
+  personel:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile
+      args:
+        APP: personel-sistemi
+    image: ardic-otomotiv/personel-sistemi
+    restart: unless-stopped
+    environment:
+      DB_DATABASE: /var/www/data/database.sqlite
+    volumes:
+      - ./env/personel.env:/var/www/html/.env:ro
+      - personel-data:/var/www/data
+      - personel-logs:/var/www/html/storage/logs
+    ports:
+      - "127.0.0.1:8100:80"
+
+  egitim:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile
+      args:
+        APP: egitim-portali
+    image: ardic-otomotiv/egitim-portali
+    restart: unless-stopped
+    environment:
+      DB_DATABASE: /var/www/data/database.sqlite
+    volumes:
+      - ./env/egitim.env:/var/www/html/.env:ro
+      - egitim-data:/var/www/data
+      - egitim-logs:/var/www/html/storage/logs
+    ports:
+      - "127.0.0.1:8101:80"
+    depends_on:
+      - personel
+
+volumes:
+  personel-data:
+  personel-logs:
+  egitim-data:
+  egitim-logs:

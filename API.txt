@@ -1,0 +1,122 @@
+PERSONEL SİSTEMİ REST API (v1)
+==============================
+
+Personel Sistemi, personel bilgilerini salt okunur bir REST API ile dışarıya açar.
+Eğitim Portalı personel verisine yalnızca bu API üzerinden erişir.
+
+
+ADRESLER
+--------
+Canlı : https://personel.turkuazcode.com/api/v1
+Yerel : http://127.0.0.1:8001/api/v1
+
+
+KİMLİK DOĞRULAMA
+----------------
+Tüm uçlar servis token'ı ister (Laravel Sanctum). Her istekte şu başlıklar gönderilir:
+
+    Authorization: Bearer <TOKEN>
+    Accept: application/json
+
+Token, güvenlik gereği bu dosyada ve depoda yer almaz; değerlendirme için ayrıca iletilir.
+Token yalnızca sunucu tarafında, Personel Sistemi'nde terminal komutuyla üretilir:
+
+    php artisan personnel:issue-token              # yeni token üretir, eskisini iptal eder
+    php artisan personnel:issue-token --days=90    # 90 gün geçerli token
+    php artisan personnel:issue-token --revoke     # tüm token'ları iptal eder
+
+    (Canlı sunucuda Docker ile: docker compose exec personel php artisan personnel:issue-token)
+
+Token özellikleri:
+  - Veritabanında yalnızca SHA-256 hash'i saklanır; düz hali sadece üretildiği anda gösterilir.
+  - Yalnızca "employees:read" yetkisi taşır. API'de yazma ucu yoktur.
+  - Yeni token üretildiğinde eskisi anında geçersiz olur.
+  - Panel oturumu (cookie) API'ye erişim sağlamaz; API yalnızca token kabul eder.
+
+İstek limiti: IP başına dakikada 60 istek. Aşılırsa 429 döner.
+
+
+UÇLAR
+-----
+
+1) GET /employees
+   Sayfalı personel listesi (silinmiş personel listelenmez).
+
+   Parametreler (hepsi opsiyonel):
+     search      Ad soyad veya e-postada arar (Türkçe büyük/küçük harf duyarsız)
+     department  Departman adına göre filtreler (ör. Üretim)
+     per_page    Sayfa başına kayıt, 1-100 (varsayılan 25)
+     page        Sayfa numarası
+
+   Örnek:
+     curl "https://personel.turkuazcode.com/api/v1/employees?per_page=2&department=Üretim" \
+       -H "Accept: application/json" \
+       -H "Authorization: Bearer <TOKEN>"
+
+   Yanıt (200):
+     {
+       "data": [
+         {
+           "id": 1,
+           "first_name": "Ahmet",
+           "last_name": "Yılmaz",
+           "full_name": "Ahmet Yılmaz",
+           "email": "ahmet.yilmaz@sirket.test",
+           "department": "Üretim",
+           "created_at": "2026-10-23T10:47:11+03:00",
+           "updated_at": "2026-10-23T10:47:11+03:00"
+         }
+       ],
+       "links": { "first": "...", "last": "...", "prev": null, "next": "..." },
+       "meta":  { "current_page": 1, "last_page": 3, "per_page": 2, "total": 5, ... }
+     }
+
+
+2) GET /employees/{id}
+   Tek personel. Personel yoksa veya silinmişse 404.
+
+   Örnek:
+     curl "https://personel.turkuazcode.com/api/v1/employees/1" \
+       -H "Accept: application/json" \
+       -H "Authorization: Bearer <TOKEN>"
+
+   Yanıt (200):
+     { "data": { "id": 1, "first_name": "Ahmet", "last_name": "Yılmaz", ... } }
+
+
+3) GET /departments
+   Departmanlar ve her departmandaki personel sayısı.
+
+   Yanıt (200):
+     {
+       "data": [
+         { "name": "Üretim", "employee_count": 5 },
+         { "name": "Kalite", "employee_count": 3 },
+         ...
+       ]
+     }
+
+
+HATA KODLARI
+------------
+  401  Token yok, geçersiz, iptal edilmiş veya süresi dolmuş   {"message": "Unauthenticated."}
+  403  Token'ın bu işlem için yetkisi yok
+  404  Kayıt bulunamadı
+  422  Geçersiz parametre (ör. per_page > 100)                {"message": "...", "errors": {...}}
+  429  İstek limiti aşıldı
+
+
+EĞİTİM PORTALI TARAFI
+---------------------
+Portal, API'ye egitim-portali/app/Services/Personnel/PersonnelApiClient.php ile bağlanır.
+Ayarlar portalın .env dosyasındadır:
+
+    PERSONNEL_API_URL=http://127.0.0.1:8001/api/v1     (canlıda: Docker iç ağı, http://personel/api/v1)
+    PERSONNEL_API_TOKEN=<TOKEN>
+    PERSONNEL_API_TIMEOUT=5          # saniye
+    PERSONNEL_API_CACHE_TTL=60       # yanıtlar 60 saniye önbellekte tutulur
+
+  - Sayfalı yanıtı sonuna kadar dolaşır (per_page=100).
+  - Bağlantı hatası ve 5xx yanıtlarında 2 kez yeniden dener.
+  - API'ye ulaşılamazsa kullanıcıya sade bir uyarı gösterilir; teknik ayrıntı yalnızca log'a yazılır.
+  - Arayüzde API adresi, token veya bağlantı ayrıntısı gösterilmez.

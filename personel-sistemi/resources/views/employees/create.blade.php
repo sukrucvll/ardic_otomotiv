@@ -1,0 +1,15 @@
+@extends('layouts.app')
+
+@section('title', 'Yeni Personel')
+@section('subtitle', 'Personel sistemine yeni bir çalışan ekleyin.')
+
+@section('actions')
+    <a href="{{ route('employees.index') }}" class="btn btn-light"><i class="bi bi-arrow-left me-1"></i> Listeye dön</a>
+@endsection
+
+@section('content')
+    <form method="POST" action="{{ route('employees.store') }}" novalidate>
+        @csrf
+        @include('employees._form', ['submitLabel' => 'Kaydet'])
+    </form>
+@endsection
