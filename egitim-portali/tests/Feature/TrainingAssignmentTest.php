@@ -175,6 +175,49 @@ class TrainingAssignmentTest extends TestCase
         $this->get('/employees/1')->assertOk()->assertSee('Ahmet Yılmaz');
     }
 
+    public function test_pages_show_warning_when_api_returns_unexpected_body(): void
+    {
+        Http::fake(['personel.test/*' => Http::response('<html>Bakım</html>', 200, ['Content-Type' => 'text/html'])]);
+        $training = Training::factory()->create();
+
+        $this->get('/employees')->assertOk()->assertSee('şu anda alınamıyor');
+        $this->get("/trainings/{$training->id}")->assertOk()->assertSee('şu anda alınamıyor');
+    }
+
+    public function test_assignment_rechecks_personnel_instead_of_using_cache(): void
+    {
+        $employee = ['id' => 1, 'first_name' => 'Ahmet', 'last_name' => 'Yılmaz', 'email' => 'ahmet@sirket.test', 'department' => 'Üretim'];
+        Http::fakeSequence('personel.test/*')
+            ->push(['data' => [$employee], 'meta' => ['last_page' => 1]])
+            ->whenEmpty(Http::response(['data' => [], 'meta' => ['last_page' => 1]]));
+        $training = Training::factory()->create();
+
+        // Liste önbelleğe alınır, ardından personel Personel Sistemi'nden silinir
+        $this->get('/employees')->assertOk()->assertSee('Ahmet Yılmaz');
+
+        $this->post("/trainings/{$training->id}/assignments", ['employee_ids' => [1]])->assertSessionHasErrors('employee_ids');
+        $this->post('/employees/1/assignments', ['training_ids' => [$training->id]])->assertNotFound();
+        $this->assertSame(0, TrainingAssignment::count());
+    }
+
+    public function test_forms_still_render_after_malformed_input(): void
+    {
+        $this->fakePersonnelApi();
+        $training = Training::factory()->create();
+
+        $this->from('/trainings/create')->post('/trainings', ['title' => ['x'], 'category' => 'Teknik', 'duration_hours' => ['2'], 'description' => ['x']])
+            ->assertRedirect('/trainings/create');
+        $this->get('/trainings/create')->assertOk();
+
+        $this->from("/trainings/{$training->id}")->post("/trainings/{$training->id}/assignments", ['employee_ids' => '1', 'due_date' => ['x']])
+            ->assertRedirect("/trainings/{$training->id}");
+        $this->get("/trainings/{$training->id}")->assertOk();
+
+        $this->from('/employees/1')->post('/employees/1/assignments', ['training_ids' => '1', 'due_date' => ['x']])
+            ->assertRedirect('/employees/1');
+        $this->get('/employees/1')->assertOk();
+    }
+
     public function test_all_pages_render_with_empty_database(): void
     {
         Http::fake(['personel.test/*' => Http::response(['data' => [], 'meta' => ['last_page' => 1]])]);

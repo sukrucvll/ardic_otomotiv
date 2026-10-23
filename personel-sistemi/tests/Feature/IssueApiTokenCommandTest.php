@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\ApiClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\PersonalAccessToken;
+use RuntimeException;
 use Tests\TestCase;
 
 class IssueApiTokenCommandTest extends TestCase
@@ -39,6 +41,37 @@ class IssueApiTokenCommandTest extends TestCase
 
         $this->assertSame(0, $client->tokens()->count());
         $this->withToken($token)->getJson('/api/v1/employees')->assertUnauthorized();
+    }
+
+    public function test_invalid_days_option_is_rejected_without_touching_existing_token(): void
+    {
+        $client = ApiClient::create(['name' => 'Eğitim Portalı']);
+        $token = $client->createToken('service-token', ['employees:read'])->plainTextToken;
+
+        foreach (['abc', '-1', '0', '1.5', '99999'] as $days) {
+            $this->artisan('personnel:issue-token', ['--days' => $days])->assertFailed();
+        }
+
+        $this->assertSame(1, $client->tokens()->count());
+        $this->withToken($token)->getJson('/api/v1/employees')->assertOk();
+    }
+
+    public function test_failed_reissue_keeps_existing_token(): void
+    {
+        $client = ApiClient::create(['name' => 'Eğitim Portalı']);
+        $token = $client->createToken('service-token', ['employees:read'])->plainTextToken;
+
+        PersonalAccessToken::creating(fn () => throw new RuntimeException('Kayıt hatası'));
+
+        try {
+            $this->artisan('personnel:issue-token')->run();
+            $this->fail('Komut hata vermeliydi.');
+        } catch (RuntimeException $e) {
+            $this->assertSame('Kayıt hatası', $e->getMessage());
+        }
+
+        $this->assertSame(1, $client->tokens()->count());
+        $this->withToken($token)->getJson('/api/v1/employees')->assertOk();
     }
 
     public function test_revoke_fails_for_unknown_client(): void

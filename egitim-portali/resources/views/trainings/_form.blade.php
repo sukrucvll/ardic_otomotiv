@@ -8,7 +8,7 @@
                 <div class="row g-3">
                     <div class="col-12">
                         <label for="title" class="form-label">Eğitim adı</label>
-                        <input type="text" id="title" name="title" value="{{ old('title', $training->title) }}"
+                        <input type="text" id="title" name="title" value="{{ \App\Support\OldInput::text('title', $training->title) }}"
                                class="form-control @error('title') is-invalid @enderror" placeholder="Örn. Temel İş Güvenliği Eğitimi" required autofocus>
                         @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
@@ -26,7 +26,7 @@
                         <label for="duration_hours" class="form-label">Süre</label>
                         <div class="input-group has-validation">
                             <input type="number" id="duration_hours" name="duration_hours" min="1" max="1000"
-                                   value="{{ old('duration_hours', $training->duration_hours) }}"
+                                   value="{{ \App\Support\OldInput::text('duration_hours', $training->duration_hours) }}"
                                    class="form-control @error('duration_hours') is-invalid @enderror" required>
                             <span class="input-group-text">saat</span>
                             @error('duration_hours') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -36,7 +36,7 @@
                         <label for="description" class="form-label">Açıklama</label>
                         <textarea id="description" name="description" rows="4"
                                   class="form-control @error('description') is-invalid @enderror"
-                                  placeholder="Eğitimin amacı, kapsamı ve hedef kitlesi...">{{ old('description', $training->description) }}</textarea>
+                                  placeholder="Eğitimin amacı, kapsamı ve hedef kitlesi...">{{ \App\Support\OldInput::text('description', $training->description) }}</textarea>
                         @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-12">

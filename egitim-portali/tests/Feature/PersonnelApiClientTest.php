@@ -6,6 +6,7 @@ use App\Services\Personnel\PersonnelApiClient;
 use App\Services\Personnel\PersonnelApiException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
@@ -70,6 +71,29 @@ class PersonnelApiClientTest extends TestCase
         $this->client()->employees();
 
         Http::assertSentCount(1);
+    }
+
+    public function test_unexpected_response_body_throws_exception(): void
+    {
+        $bodies = [
+            'HTML' => Http::response('<html>Bakım</html>', 200, ['Content-Type' => 'text/html']),
+            'data yok' => Http::response(['message' => 'ok']),
+            'data dizi değil' => Http::response(['data' => 'x', 'meta' => ['last_page' => 1]]),
+            'eksik alan' => Http::response(['data' => [['id' => 1]], 'meta' => ['last_page' => 1]]),
+            'alan türü yanlış' => Http::response(['data' => [['id' => 1, 'first_name' => ['x'], 'last_name' => 'B', 'email' => 'a@x.test', 'department' => 'Üretim']], 'meta' => ['last_page' => 1]]),
+        ];
+
+        foreach ($bodies as $case => $response) {
+            Http::fake(['personel.test/*' => $response]);
+            Cache::flush();
+
+            try {
+                $this->client()->employees();
+                $this->fail("Beklenmeyen yanıt kabul edildi: {$case}");
+            } catch (PersonnelApiException) {
+                $this->assertFalse(Cache::has('personnel.employees'), "Bozuk yanıt önbelleğe yazıldı: {$case}");
+            }
+        }
     }
 
     public function test_unauthorized_response_throws_meaningful_exception(): void

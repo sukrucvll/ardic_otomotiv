@@ -68,7 +68,7 @@
                                     @foreach ($availableTrainings as $training)
                                         <label class="employee-option">
                                             <input class="form-check-input mt-0" type="checkbox" name="training_ids[]" value="{{ $training->id }}"
-                                                @checked(in_array($training->id, old('training_ids', [])))>
+                                                @checked(in_array($training->id, \App\Support\OldInput::list('training_ids')))>
                                             <i class="bi bi-{{ $training->category_icon }} text-{{ $training->category_color }}"></i>
                                             <span class="min-w-0 flex-grow-1">
                                                 <span class="d-block fw-medium text-truncate">{{ $training->title }}</span>
@@ -79,7 +79,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="due_date" class="form-label">Son tamamlama tarihi <span class="text-muted fw-normal">(opsiyonel)</span></label>
-                                    <input type="date" id="due_date" name="due_date" value="{{ old('due_date') }}" min="{{ today()->toDateString() }}"
+                                    <input type="date" id="due_date" name="due_date" value="{{ \App\Support\OldInput::text('due_date') }}" min="{{ today()->toDateString() }}"
                                            class="form-control @error('due_date') is-invalid @enderror">
                                     @error('due_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>

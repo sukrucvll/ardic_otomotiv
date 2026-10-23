@@ -26,17 +26,18 @@ class EmployeeRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:255', $unique],
-            'department' => ['required', Rule::in(array_keys(config('personnel.departments')))],
+            'email' => ['required', 'string', 'email', 'max:255', $unique],
+            'department' => ['required', 'string', Rule::in(array_keys(config('personnel.departments')))],
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        $this->merge([
-            'first_name' => trim((string) $this->input('first_name')),
-            'last_name' => trim((string) $this->input('last_name')),
-            'email' => mb_strtolower(trim((string) $this->input('email'))),
-        ]);
+        // Yalnızca metin değerler düzenlenir; dizi gibi yanlış türler doğrulamada reddedilir
+        foreach (['first_name', 'last_name', 'email'] as $field) {
+            if (is_string($value = $this->input($field))) {
+                $this->merge([$field => $field === 'email' ? mb_strtolower(trim($value)) : trim($value)]);
+            }
+        }
     }
 }

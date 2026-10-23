@@ -24,6 +24,11 @@ class PersonnelApiException extends RuntimeException
         return new self('Personel Sistemi\'ne ulaşılamıyor. Servisin çalıştığından emin olun.', 0, $previous);
     }
 
+    public static function invalidResponse(): self
+    {
+        return new self('Personel Sistemi beklenmeyen biçimde bir yanıt döndürdü (JSON veya personel alanları eksik).');
+    }
+
     public static function fromResponse(Response $response): self
     {
         $message = match ($response->status()) {

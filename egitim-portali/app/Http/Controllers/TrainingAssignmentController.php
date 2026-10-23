@@ -52,9 +52,10 @@ class TrainingAssignmentController extends Controller
     {
         $ids = collect($request->validated('employee_ids'))->map(fn ($id) => (int) $id);
 
-        // Formdan gelen ID'lere güvenilmez; personel bilgisi API'den doğrulanarak alınır
+        // Formdan gelen ID'lere güvenilmez; personel bilgisi API'den doğrulanarak alınır.
+        // Önbellek atlanır: bu arada silinen veya bilgisi değişen personele eski veriyle atama yapılmaz.
         try {
-            $employees = $personnel->employees()->only($ids->all());
+            $employees = $personnel->employees(fresh: true)->only($ids->all());
         } catch (PersonnelApiException) {
             return back()->with('error', PersonnelApiException::USER_MESSAGE);
         }
@@ -79,7 +80,7 @@ class TrainingAssignmentController extends Controller
     public function storeForEmployee(AssignTrainingsRequest $request, int $employee, PersonnelApiClient $personnel, AssignTraining $assign): RedirectResponse
     {
         try {
-            $data = $personnel->find($employee);
+            $data = $personnel->find($employee, fresh: true);
         } catch (PersonnelApiException) {
             return back()->with('error', PersonnelApiException::USER_MESSAGE);
         }

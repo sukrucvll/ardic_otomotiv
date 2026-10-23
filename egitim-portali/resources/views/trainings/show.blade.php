@@ -170,7 +170,7 @@
                                            data-search="{{ $employee->fullName().' '.$employee->email }}"
                                            data-department="{{ $employee->department }}">
                                         <input class="form-check-input mt-0" type="checkbox" name="employee_ids[]" value="{{ $employee->id }}"
-                                               @disabled($assigned) @checked(in_array($employee->id, old('employee_ids', [])))>
+                                               @disabled($assigned) @checked(in_array($employee->id, \App\Support\OldInput::list('employee_ids')))>
                                         <span class="avatar bg-{{ $employee->departmentColor() }}-subtle text-{{ $employee->departmentColor() }}-emphasis">{{ $employee->initials() }}</span>
                                         <span class="min-w-0 flex-grow-1">
                                             <span class="d-block fw-medium text-truncate">{{ $employee->fullName() }}</span>
@@ -188,7 +188,7 @@
 
                             <div class="mb-3">
                                 <label for="due_date" class="form-label">Son tamamlama tarihi <span class="text-muted fw-normal">(opsiyonel)</span></label>
-                                <input type="date" id="due_date" name="due_date" value="{{ old('due_date') }}" min="{{ today()->toDateString() }}"
+                                <input type="date" id="due_date" name="due_date" value="{{ \App\Support\OldInput::text('due_date') }}" min="{{ today()->toDateString() }}"
                                        class="form-control @error('due_date') is-invalid @enderror">
                                 @error('due_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>

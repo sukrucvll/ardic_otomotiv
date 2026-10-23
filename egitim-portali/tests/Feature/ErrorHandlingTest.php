@@ -42,6 +42,15 @@ class ErrorHandlingTest extends TestCase
         }
     }
 
+    public function test_malformed_login_input_is_rejected_and_login_page_still_renders(): void
+    {
+        $this->from('/login')->post('/login', ['email' => ['x'], 'password' => 'y'])
+            ->assertRedirect('/login')
+            ->assertSessionHasErrors('email');
+
+        $this->get('/login')->assertOk();
+    }
+
     public function test_out_of_range_employee_id_is_not_found(): void
     {
         $this->actingAs(User::factory()->create());

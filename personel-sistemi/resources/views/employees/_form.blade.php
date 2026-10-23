@@ -8,13 +8,13 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label for="first_name" class="form-label">Ad</label>
-                        <input type="text" id="first_name" name="first_name" value="{{ old('first_name', $employee->first_name) }}"
+                        <input type="text" id="first_name" name="first_name" value="{{ \App\Support\OldInput::text('first_name', $employee->first_name) }}"
                                class="form-control @error('first_name') is-invalid @enderror" placeholder="Örn. Ahmet" required autofocus>
                         @error('first_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-md-6">
                         <label for="last_name" class="form-label">Soyad</label>
-                        <input type="text" id="last_name" name="last_name" value="{{ old('last_name', $employee->last_name) }}"
+                        <input type="text" id="last_name" name="last_name" value="{{ \App\Support\OldInput::text('last_name', $employee->last_name) }}"
                                class="form-control @error('last_name') is-invalid @enderror" placeholder="Örn. Yılmaz" required>
                         @error('last_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
@@ -22,7 +22,7 @@
                         <label for="email" class="form-label">E-posta</label>
                         <div class="input-group has-validation">
                             <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                            <input type="email" id="email" name="email" value="{{ old('email', $employee->email) }}"
+                            <input type="email" id="email" name="email" value="{{ \App\Support\OldInput::text('email', $employee->email) }}"
                                    class="form-control @error('email') is-invalid @enderror" placeholder="ad.soyad@sirket.com" required>
                             @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>

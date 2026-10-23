@@ -61,7 +61,7 @@
                     <label for="email" class="form-label">E-posta</label>
                     <div class="input-group input-group-lg has-validation">
                         <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                        <input type="email" id="email" name="email" value="{{ old('email') }}" autocomplete="username"
+                        <input type="email" id="email" name="email" value="{{ \App\Support\OldInput::text('email') }}" autocomplete="username"
                                class="form-control @error('email') is-invalid @enderror" placeholder="ad.soyad@sirket.com" required autofocus>
                         @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>

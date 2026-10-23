@@ -25,6 +25,9 @@ class PersonnelApiClient
 
     private const PER_PAGE = 100;
 
+    // Hatalı bir last_page değeri sonsuz istek döngüsü oluşturmasın (100 × 100 = 10.000 personel)
+    private const MAX_PAGES = 100;
+
     public function __construct(
         private readonly string $baseUrl,
         private readonly ?string $token,
@@ -39,8 +42,13 @@ class PersonnelApiClient
      *
      * @throws PersonnelApiException
      */
-    public function employees(): Collection
+    public function employees(bool $fresh = false): Collection
     {
+        // Atama gibi veri yazan işlemler önbelleği atlayıp güncel listeyi ister
+        if ($fresh) {
+            Cache::forget(self::EMPLOYEES_CACHE_KEY);
+        }
+
         // Önbellekte nesne değil düz dizi tutulur (Laravel önbellekten sınıf açmaz)
         $rows = Cache::remember(self::EMPLOYEES_CACHE_KEY, $this->cacheTtl, fn () => $this->fetchAllEmployees());
 
@@ -52,9 +60,9 @@ class PersonnelApiClient
     /**
      * @throws PersonnelApiException
      */
-    public function find(int $id): ?EmployeeData
+    public function find(int $id, bool $fresh = false): ?EmployeeData
     {
-        return $this->employees()->get($id);
+        return $this->employees($fresh)->get($id);
     }
 
     /**
@@ -81,11 +89,31 @@ class PersonnelApiClient
 
         do {
             $json = $this->get('employees', ['per_page' => self::PER_PAGE, 'page' => $page]);
-            array_push($rows, ...$json['data']);
-            $lastPage = (int) ($json['meta']['last_page'] ?? 1);
+
+            // Yanıt önbelleğe yazılmadan önce doğrulanır; bozuk veri sayfaları çökertmesin
+            if (! is_array($json['data'] ?? null) || ! array_is_list($json['data'])) {
+                $this->fail(PersonnelApiException::invalidResponse(), 'employees');
+            }
+
+            foreach ($json['data'] as $row) {
+                if (! $this->isValidEmployee($row)) {
+                    $this->fail(PersonnelApiException::invalidResponse(), 'employees');
+                }
+
+                $rows[] = $row;
+            }
+
+            $lastPage = min((int) ($json['meta']['last_page'] ?? 1), self::MAX_PAGES);
         } while (++$page <= $lastPage);
 
         return $rows;
+    }
+
+    private function isValidEmployee(mixed $row): bool
+    {
+        return is_array($row)
+            && filter_var($row['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false
+            && collect(['first_name', 'last_name', 'email', 'department'])->every(fn ($field) => is_string($row[$field] ?? null));
     }
 
     /**
@@ -108,7 +136,14 @@ class PersonnelApiClient
             $this->fail(PersonnelApiException::fromResponse($response), $path);
         }
 
-        return $response->json();
+        // 200 dönse bile gövde JSON olmayabilir (ör. yanlış adres, araya giren bir HTML sayfası)
+        $json = $response->json();
+
+        if (! is_array($json)) {
+            $this->fail(PersonnelApiException::invalidResponse(), $path);
+        }
+
+        return $json;
     }
 
     /**

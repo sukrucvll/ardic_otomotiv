@@ -36,6 +36,31 @@ class ErrorHandlingTest extends TestCase
         $this->get('/employees?department[]=x')->assertRedirect();
     }
 
+    public function test_malformed_employee_fields_are_rejected_and_form_still_renders(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        foreach (['first_name', 'last_name', 'email'] as $field) {
+            $this->from('/employees/create')
+                ->post('/employees', array_merge([
+                    'first_name' => 'Ahmet', 'last_name' => 'Yılmaz', 'email' => 'ahmet@sirket.test', 'department' => 'Üretim',
+                ], [$field => ['x']]))
+                ->assertRedirect('/employees/create')
+                ->assertSessionHasErrors($field);
+
+            $this->get('/employees/create')->assertOk();
+        }
+    }
+
+    public function test_malformed_login_input_is_rejected_and_login_page_still_renders(): void
+    {
+        $this->from('/login')->post('/login', ['email' => ['x'], 'password' => 'y'])
+            ->assertRedirect('/login')
+            ->assertSessionHasErrors('email');
+
+        $this->get('/login')->assertOk();
+    }
+
     public function test_api_errors_stay_json(): void
     {
         $this->getJson('/api/v1/employees/999')->assertUnauthorized()->assertJson(['message' => 'Unauthenticated.']);
